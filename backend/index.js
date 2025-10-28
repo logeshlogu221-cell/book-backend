@@ -1,46 +1,42 @@
 const express = require("express");
 const cors = require("cors");
-
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Temporary data store
 let books = [
-  { id: 1, title: "Book One", author: "Author One" },
-  { id: 2, title: "Book Two", author: "Author Two" },
+  { id: 1, title: "Book One", author: "Author A" },
+  { id: 2, title: "Book Two", author: "Author B" }
 ];
 
-// GET all books
+app.get("/", (req, res) => {
+  res.send("📚 Book Library Backend is Running!");
+});
+
 app.get("/api/books", (req, res) => {
   res.json(books);
 });
 
-// POST a new book
 app.post("/api/books", (req, res) => {
   const newBook = { id: Date.now(), ...req.body };
   books.push(newBook);
   res.json(newBook);
 });
 
-// PUT (update) a book
 app.put("/api/books/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  const index = books.findIndex((b) => b.id === id);
-  if (index !== -1) {
-    books[index] = { ...books[index], ...req.body };
-    res.json(books[index]);
-  } else {
-    res.status(404).json({ message: "Book not found" });
-  }
+  books = books.map((book) => (book.id === id ? { ...book, ...req.body } : book));
+  res.json({ message: "Book updated successfully" });
 });
 
-// DELETE a book
 app.delete("/api/books/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  books = books.filter((b) => b.id !== id);
-  res.json({ message: "Book deleted" });
+  books = books.filter((book) => book.id !== id);
+  res.json({ message: "Book deleted successfully" });
 });
 
-// Start server
-app.listen(5000, () => console.log("🚀 Server running on port 5000"));
+const port = process.env.PORT || 5000;
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+
+module.exports = app; // Important for Vercel!
